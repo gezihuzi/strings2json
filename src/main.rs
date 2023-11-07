@@ -30,14 +30,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 fn strings_to_json(path: &Path) -> Result<String, Box<dyn std::error::Error>> {
     println!("Converting {:?}", path);
-
     // 打开.strings文件
     let file = File::open(path).expect("Failed to open input file");
     let reader = BufReader::new(file);
-
     // 创建一个空的JSON对象
     let mut json = json!({});
-
     for line in reader.lines() {
         if let Ok(line_str) = line {
             // 解析每一行，提取出key和value
@@ -47,7 +44,6 @@ fn strings_to_json(path: &Path) -> Result<String, Box<dyn std::error::Error>> {
             }
         }
     }
-
     let json = serde_json::to_string_pretty(&json)?;
     Ok(json)
 }

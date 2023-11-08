@@ -6,7 +6,6 @@ use std::path::Path;
 
 pub fn strings_to_json(input: &Path, output: &Path) -> Result<(), Box<dyn std::error::Error>> {
     let json = convert_to_json(&input)?;
-    // 输出到文件
     let mut output = File::create(output)?;
     write!(output, "{}", json)?;
     Ok(())
@@ -38,12 +37,12 @@ fn parse_line(line: &str) -> Option<(String, String)> {
         if parts.len() == 2 {
             let key = parts[0].trim_end_matches(';').trim_matches('"').to_string();
             let mut value = parts[1].trim_end_matches(';').trim_matches('"').to_string();
-            // 将%1$@，%2$@等转换为${t1}，${t2}等
+            // 将有序的%n$(@|d|i|u|f|c|s)转换为{tn}
             let re = Regex::new(r"%(\d+)\$(@|d|i|u|f|c|s)").ok()?;
             value = re
-                .replace_all(&value, |caps: &Captures| format!("${{t{}}}", &caps[1]))
+                .replace_all(&value, |caps: &Captures| format!("{{t{}}}", &caps[1]))
                 .to_string();
-            // 将%@转换为{t1}，{t2}等，根据实际的顺序
+            // 将无序的%(@|d|i|u|f|c|s)转换为{t1}，%(@|d|i|u|f|c|s)转换为{t2}等
             let re_unordered = Regex::new(r"%(@|d|i|u|f|c|s)").ok()?;
             let mut index = 1;
             value = re_unordered
